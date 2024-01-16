@@ -176,28 +176,36 @@ function checkTurn() {
         url: "../api/seiraPekti.php", // Update to your PHP file name
         type: "GET",
         success: function(response) {
+            if (response.trim().toLowerCase() === "not_both_logged_in") {
+                element = document.getElementById("inner-text");
+                element.innerHTML = "Δεν έχει συνδεθεί αντίπαλος.";
+                document.getElementById("startBtn").style.visibility = "";
+            }else{
             //An einai i seira sou
             console.log("Your turn:", response);
             if (response.trim().toLowerCase() === "true") {
                     locker = document.getElementById("overlay");
                     //des an iparxei i class locked
+                    element = document.getElementById("inner-text");
+                    element.innerHTML = "Σειρά σου.";
                     if (locker.classList.contains("locked")) {
                         locker.classList.remove("locked");
-                        element = document.getElementById("inner-text");
-                        element.innerHTML = "Σειρά σου.";
                     }
  
             }
             //An den einai i seira sou
             if (response.trim().toLowerCase() === "false") {
+                //alert("den einai");
                     locker = document.getElementById("overlay");
                     //des an den iparxei i class locked
+                    element = document.getElementById("inner-text");
+                    element.innerHTML = "Σειρά αντιπάλου.";
                     if (!locker.classList.contains("locked")) {
                         locker.classList.add("locked");
-                        element = document.getElementById("inner-text");
-                        element.innerHTML = "Σειρά αντιπάλου.";
                     } 
             }
+        }
+            
         },
         error: function(xhr, status, error) {
             console.error("Error occurred:", error);
@@ -232,7 +240,7 @@ function logout(){
         url: "../api/logout.php", 
         success: function(response){
             // Handle the response
-            window.location.href = "index.php";
+            window.location.href = "../index.php";
         },
         error: function(xhr, status, error) {
             console.error("AJAX request failed:", status, error);
@@ -250,6 +258,7 @@ function logout(){
   $(document).ready(function () {
     // Add click event listener to grid1 cells
     $('#grid1 .grid-cell').click(function () {
+        checkTurn();
         // Check if the cell has already been clicked
         if ($(this).hasClass('clicked')) {
             // Cell has already been clicked, do nothing
@@ -263,7 +272,7 @@ function logout(){
         $(this).addClass('clicked');
         // Uncomment the following line if you want to show an alert
         // alert("Cell clicked and marked as clicked");
-        checkTurn();
+
         }
     });
 });
@@ -336,11 +345,12 @@ function compareHitsWithShips() {
 
     $.ajax({
         url: '../api/fetch-enemy-ships.php',
-        type: 'POST',
+        type: 'GET',
         success: function (hitResult,response) {
             try {
                 console.log('AJAX success. Received hitResult:', hitResult);
                 console.log(response);
+
 
                 // Check if the response is valid JSON
                 var parsedResult = JSON.parse(hitResult);
@@ -351,7 +361,7 @@ function compareHitsWithShips() {
                 }
 
                 console.log('Parsed result:', parsedResult);
-
+                //alert(parsedResult);
                 // Iterate through each result and call markCell
                 parsedResult.forEach(function (result) {
                     var xCoordinate = result.coordinate.x;
@@ -381,9 +391,9 @@ function compareHitsWithShips() {
 
 
 
-
+var i=0;
 function markCell(xCoordinate, yCoordinate, isHit) {
-
+   
     try {
         console.log('Received isHit:', isHit);
 
@@ -407,9 +417,20 @@ function markCell(xCoordinate, yCoordinate, isHit) {
 
         // Mark the cell as hit or miss based on the 'isHit' value (case-insensitive)
         if (isHit.trim().toLowerCase() === 'yes') {
-            //alert("petixes");
+            //alert("+1");
             // Add a CSS class to mark the cell as hit
             $(`#${cellId}`).addClass('hit-cell');
+            i = i+1;
+            //alert(i);
+            //An xtypiseis 6 fores ploio simainei oti nikise 3+2+1= 6 hits synolo gia nikh.
+            if(i===6){
+                //alert("nikises");
+                document.getElementById("inner-text").innerText = "Συγχαρητήρια. Νίκησες!";
+                document.getElementById("startBtn").style.visibility = "";
+
+                return;
+            }
+            //alert("petixes");
         } else if (isHit.trim().toLowerCase() === 'no') {
             $(`#${cellId}`).addClass('empty-cell');
            //alert("astoxises");
@@ -426,3 +447,45 @@ function markCell(xCoordinate, yCoordinate, isHit) {
 
 
 
+
+
+//Vres kai simeiwse ta hits tou antipalou ston pinaka tou session user 
+function myGridUpdate(){
+    $.ajax({
+        url: '../api/myGridCondition.php',
+        type: 'GET',
+        success: function(data) {
+                // Check if the response is valid JSON
+                var parsedResult = JSON.parse(data);
+                alert(parsedResult);
+        },
+        error: function(xhr, status, error) {
+            // Code to handle errors goes here
+            console.log("Error:", error);
+        }
+    });
+}
+
+
+
+
+
+
+
+$(document).ready(function () {
+    $('#grid2 .grid-cell').click(function () {
+        // Check if the cell has already been clicked
+        if ($(this).hasClass('clicked')) {
+            // Cell has already been clicked, do nothing
+            return;
+        }else{
+            myGridUpdate()
+        const cellId = $(this).attr('id');
+        const coordinates = parseCellId(cellId);
+        //alert(coordinates);
+        // Add a class to mark the cell as clicked
+        $(this).addClass('clicked');
+        $(this).addClass('empty-cell');
+        }
+    });
+});
