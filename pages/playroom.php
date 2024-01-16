@@ -11,6 +11,8 @@ session_start();
 </head>
 <body>
 
+
+<div style="font-size:30px; font-weight:700; position:absolute;top:30px; left:30px;">Navmaxia</div>
 <div class="top-section">
   <div class="ekfonitis" id="ekfonitis" style="padding: 5px;">
       <p id="inner-text">Πατήστε το κουμπί για να ξεκινήσετε.</p>
@@ -118,7 +120,7 @@ session_start();
     <p style="text-align: center; padding: 10px; margin-left: 100px;">Πίνακας αντιπάλου</p>
   </div>
   
-<div style="position:absolute; bottom:40px; left:40px;">
+<div style="position:absolute; color:white; bottom:0px; left:0px; padding:0px 10px 0px 10px; background-color:green; border-top-right-radius: 10px;">
 <p>Είσαι ο <span><?php echo $_SESSION["username"];?></span></p> 
 </div>
 
