@@ -124,9 +124,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 function start(){
-    //alert(allShipCoordinatesJSON);
-     // Send AJAX request
+   
     // Get the element by its ID
+    //kalei tin checkturn kathe x seconds
     setInterval(checkTurn, 3000);
     document.getElementById("startBtn").style.visibility = "hidden";
 
@@ -180,14 +180,21 @@ function checkTurn() {
                 element = document.getElementById("inner-text");
                 element.innerHTML = "Δεν έχει συνδεθεί αντίπαλος.";
                 document.getElementById("startBtn").style.visibility = "";
-            }else{
+            }
+            else{
             //An einai i seira sou
             console.log("Your turn:", response);
+
+
             if (response.trim().toLowerCase() === "true") {
                     locker = document.getElementById("overlay");
                     //des an iparxei i class locked
                     element = document.getElementById("inner-text");
                     element.innerHTML = "Σειρά σου.";
+                    document.getElementById("startBtn").style.visibility = "hidden";
+
+                    myGridUpdate()
+
                     if (locker.classList.contains("locked")) {
                         locker.classList.remove("locked");
                     }
@@ -199,6 +206,7 @@ function checkTurn() {
                     locker = document.getElementById("overlay");
                     //des an den iparxei i class locked
                     element = document.getElementById("inner-text");
+                    document.getElementById("startBtn").style.visibility = "hidden";
                     element.innerHTML = "Σειρά αντιπάλου.";
                     if (!locker.classList.contains("locked")) {
                         locker.classList.add("locked");
@@ -339,7 +347,7 @@ function saveHitCoordinates(coordinates) {
 
 //Afti i function:
 //(1) Pairnei apo tin db tis syntetagmenes apo ta ploia toy antipaloy.
-//(2) Sygrinei an to hit pou egine teleftaio xtypaei kapoio ploio toy antipalou kai allazei to css tou keliou analoga.
+//(2) Sygrinei an to hit pou egine teleftaio xtypaei kapoio ploio toy antipalou kai allazei to css tou keliou pou egine click.
 function compareHitsWithShips() {
     console.log('Entering compareHitsWithShips');
 
@@ -373,7 +381,8 @@ function compareHitsWithShips() {
                     console.log('Calling markCell with x:', xCoordinate, 'y:', yCoordinate, 'isHit:', isHit);
 
                     // Call markCell with the received values
-                    markCell(xCoordinate, yCoordinate, isHit);
+                    //gridNumber = "grid1";
+                    markCell(xCoordinate, yCoordinate, isHit, "grid1");
                 });
             } catch (error) {
                 console.error('Error processing AJAX response:', error.message);
@@ -391,8 +400,7 @@ function compareHitsWithShips() {
 
 
 
-var i=0;
-function markCell(xCoordinate, yCoordinate, isHit) {
+function markCell(xCoordinate, yCoordinate, isHit, gridNumber) {
    
     try {
         console.log('Received isHit:', isHit);
@@ -408,7 +416,7 @@ function markCell(xCoordinate, yCoordinate, isHit) {
         }
 
         // Cell ID based on the hit coordinates
-        var cellId = `grid1-cell-${xCoordinate}-${yCoordinate}`;
+        var cellId = `${gridNumber}-cell-${xCoordinate}-${yCoordinate}`;
 
         // Check if the cell with the specified ID exists
         if ($(`#${cellId}`).length === 0) {
@@ -420,23 +428,18 @@ function markCell(xCoordinate, yCoordinate, isHit) {
             //alert("+1");
             // Add a CSS class to mark the cell as hit
             $(`#${cellId}`).addClass('hit-cell');
-            i = i+1;
-            //alert(i);
-            //An xtypiseis 6 fores ploio simainei oti nikise 3+2+1= 6 hits synolo gia nikh.
-            if(i===6){
-                //alert("nikises");
-                document.getElementById("inner-text").innerText = "Συγχαρητήρια. Νίκησες!";
-                document.getElementById("startBtn").style.visibility = "";
 
-                return;
-            }
-            //alert("petixes");
         } else if (isHit.trim().toLowerCase() === 'no') {
             $(`#${cellId}`).addClass('empty-cell');
            //alert("astoxises");
         } else {
             throw new Error(`Invalid 'isHit' value: ${isHit}`);
         }
+
+        anakinwsi();
+  
+        // document.getElementById("inner-text").innerText = "Συγχαρητήρια. Νίκησες!";
+        // document.getElementById("startBtn").style.visibility = "";
     } catch (error) {
         console.error('Error in markCell:', error.message);
         // Handle the error, show a user-friendly message, or take appropriate action
@@ -449,15 +452,81 @@ function markCell(xCoordinate, yCoordinate, isHit) {
 
 
 
+
+//Update to colunm game_status kai enimerwse tous pektes analoga.
+// To column game_status mporei na parei tis times: none, win, lose, left, in-game.
+//kathe fora pou fotrwnetai to playroom.php o player pairnei tin timi left.
+function anakinwsi(){
+
+    // jQuery AJAX GET request
+    $.ajax({
+        url: '../api/anakinwsi.php', 
+        type: 'GET',
+        success: function(response) {
+            if (response == "win"){
+                document.getElementById("final-announcement").innerText = "Συγχαρητήρια, νίκησες!";
+                document.getElementById("modal").style.display = "";
+            }else{
+                //alert(response);
+            }
+
+
+
+
+        },
+        error: function(xhr, status, error) {
+            // Handle errors here
+            console.error('AJAX Error: ' + status, error);
+        }
+    });
+}
+
+
+
+
+
+
+
 //Vres kai simeiwse ta hits tou antipalou ston pinaka tou session user 
+//Kaleitai kathe 3 sec.
 function myGridUpdate(){
     $.ajax({
-        url: '../api/myGridCondition.php',
+        url: '../api/myGridUpdate.php',
         type: 'GET',
-        success: function(data) {
+        success: function(hitResult,response) {
+            try {
+                console.log('AJAX success. Received hitResult:', hitResult);
+                console.log(response);
+
+
                 // Check if the response is valid JSON
-                var parsedResult = JSON.parse(data);
-                alert(parsedResult);
+                var parsedResult = JSON.parse(hitResult);
+
+                // Check if the parsed result has the expected structure
+                if (!Array.isArray(parsedResult)) {
+                    throw new Error("Invalid response format");
+                }
+
+                console.log('Parsed result:', parsedResult);
+                //alert(parsedResult);
+                // Iterate through each result and call markCell
+                parsedResult.forEach(function (result) {
+                    var xCoordinate = result.coordinate.x;
+                    var yCoordinate = result.coordinate.y;
+
+                    //window hia na mporei na to parei pio katw ektos scope
+                    window.isHit = result.isHit;
+
+                    console.log('Calling markCell with x:', xCoordinate, 'y:', yCoordinate, 'isHit:', isHit);
+
+                    // Call markCell with the received values
+                    //gridNumber = "grid1";
+                    markCell(xCoordinate, yCoordinate, isHit, "grid2");
+                });
+            } catch (error) {
+                console.error('Error processing AJAX response:', error.message);
+                // Handle the error, show a user-friendly message, or take appropriate action
+            }
         },
         error: function(xhr, status, error) {
             // Code to handle errors goes here
@@ -471,21 +540,3 @@ function myGridUpdate(){
 
 
 
-
-$(document).ready(function () {
-    $('#grid2 .grid-cell').click(function () {
-        // Check if the cell has already been clicked
-        if ($(this).hasClass('clicked')) {
-            // Cell has already been clicked, do nothing
-            return;
-        }else{
-            myGridUpdate()
-        const cellId = $(this).attr('id');
-        const coordinates = parseCellId(cellId);
-        //alert(coordinates);
-        // Add a class to mark the cell as clicked
-        $(this).addClass('clicked');
-        $(this).addClass('empty-cell');
-        }
-    });
-});

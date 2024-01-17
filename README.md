@@ -38,6 +38,16 @@ Import the navmaxia.sql file to a localhost database.
 - Players take turns guessing coordinates to locate and sink each other's ships.
 - The first player to sink all of their opponent's ships wins.
 
+## Api Functionality
+
+1. Otan kanei click sto koumpi start, kanei ajax request POST kai kataxwrei ston pinaka ships tou session user tis sintetagmenes twn ploiwn tou.
+2. Kathe 3 defterolepta kaleitai i function checkTurn() pou kanei ajax request kai tsekarei pios paiktis exei seira kathws kai AN oi 2 pektes exoun sindethei.
+3. Kathe 3 defterolepta kaleitai i function myGridUpdate opou markarei ta apotelesmata sto diko mou pinaka.
+4. Ginetai ajax gia apothikeysh twn hits kathe fora pou xtipaei o session username ena keli tou pinaka.
+5. I function compareHitswithShips kanei ajax request kai sygkrinei an xtypise o session user kapoio ploio tou antipalou.
+6. Ginetai ajax me to arxeio /api/anakinwsi.php kai o session user vlepei an exei nikisei.
+6. I logout function kanei ajax request POST kai kanei update to column logged_in=0 stin db sto table users.
+
 ## License
 
 This project is made by Konstantinos Tantanasis Charalampidis.

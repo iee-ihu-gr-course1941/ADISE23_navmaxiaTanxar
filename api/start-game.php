@@ -14,6 +14,22 @@ try {
     // Set the PDO error mode to exception
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    $username = $_SESSION["username"];
+
+    // katharise ta hits stin db apo palio paixnidi.
+    $sql = "UPDATE users SET ships_hits = '' WHERE username = :username";
+    
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+        $stmt->execute();
+    
+        echo "Ships hits updated to 'x' for Username: $username";
+    } catch (PDOException $e) {
+        // Handle query error
+        echo "Error executing the query: " . $e->getMessage();
+    }
+
     $jsonShipsData = $_POST['data'];
 
     // Check if both players are logged in
@@ -39,6 +55,9 @@ try {
         } else {
             echo "No rows updated. Username '$username' not found or players not connected.";
         }
+
+        
+
     } else {
         echo "Both players are not logged in.";
     }

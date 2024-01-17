@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once('../includes/db_connect.php'); // Include your database connection file
+require_once('../includes/db_connect.php'); // Include database connection file
 
 if (isset($_SESSION['username']) && isset($_POST['hits'])) {
     $username = $_SESSION['username'];

@@ -1,5 +1,17 @@
 <?php
 session_start();
+require_once '../includes/db_connect.php';
+$Username = $_SESSION['username'];
+try {
+//Vale tin timi left sto column game_status
+$updateSql = "UPDATE users SET game_status = 'left' WHERE username = :username";
+$updateStmt = $pdo->prepare($updateSql);
+$updateStmt->bindParam(':username', $Username);
+$updateStmt->execute();
+}catch (PDOException $e) {
+  // Handle database errors
+  echo "Error: " . $e->getMessage();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +29,7 @@ session_start();
   <div class="ekfonitis" id="ekfonitis" style="padding: 5px;">
       <p id="inner-text">Πατήστε το κουμπί για να ξεκινήσετε.</p>
   </div>
-  <button id="startBtn" onclick="start()" style="margin-left:30px; background-color: rgba(35, 211, 0, 0); border-radius: 10px; cursor: pointer;">Ψάξε αντίπαλο</button>
+  <button id="startBtn" onclick="start()">Ψάξε αντίπαλο</button>
 </div>
 
 
@@ -120,13 +132,27 @@ session_start();
     <p style="text-align: center; padding: 10px; margin-left: 100px;">Πίνακας αντιπάλου</p>
   </div>
   
-<div style="position:absolute; color:white; bottom:0px; left:0px; padding:0px 10px 0px 10px; background-color:green; border-top-right-radius: 10px;">
-<p>Είσαι ο <span><?php echo $_SESSION["username"];?></span></p> 
+<div style="position:absolute; color:black; bottom:0px; left:0px; padding:0px 10px 0px 10px; background-color:#e3e3e3; border-top-right-radius: 10px;">
+<p>Είσαι ο <span style="font-weight:600;"><?php echo $_SESSION["username"];?></span></p> 
 </div>
 
  <div style="position:absolute; top:40px; right:40px;">
  <a onclick="logout()" style="font-size:14px; padding:7px 10px 7px 10px; border: 1px solid red; border-radius:10px; cursor:pointer;">Έξοδος</a>
 </div>
+
+
+
+
+<div style="width:100%; height:100%; background-color: rgba(0, 0, 0, 0.95); position:absolute; display:none;" id="modal">
+  <div style="color:white; text-align:center; font-size:20px; position:absolute; top:40%; left:50%; transform: translateX(-50%);">
+    <p id="final-announcement" style="font-size:30px; font-weight:600;"></p>
+    <p>Κάνε επαναφόρτωση σελίδας για νέο αγώνα.</p>
+  </div>
+</div>
+
+
+
+
   
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="../js/playroom-scrips.js"></script>
